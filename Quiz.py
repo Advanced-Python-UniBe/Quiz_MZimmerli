@@ -106,6 +106,8 @@ def take_quiz():
     global question_df
     QUIZ_QUESTION_COUNT = 5
     possible_questions = list(set(question_df.reset_index(level=[1]).index[1:]))
+    # Make sure that the quesiton database is not empty
+    assert len(possible_questions) != 0
     true_quiz_length = min([QUIZ_QUESTION_COUNT,len(possible_questions)])
     # print(sample(possible_questions,2))
     questions_sample = sample(possible_questions,true_quiz_length)
@@ -116,14 +118,16 @@ def take_quiz():
         # clearConsole()
         print('\nQuestion ' + str(question_number+1) + ':')
         question = no_answers_df_copy.loc[questions_sample[question_number]].reset_index()
+        question.index += 1
         question.columns = ['Answer options','']
         print(question)
         answer_option_count = len(no_answers_df_copy.loc[questions_sample[question_number]].index)
         # print(str(answer_option_count) + ' options')
-        # Reused code from add_questions --> if possible, make a reusable function out of this late
+        # Reused code from add_questions --> if possible, make a reusable function out of this later
         while True:
         
             correct_index_str = input('\nPlease list the indices of all answers which you think are correct (separated by commas if multiple answers are correct):\n')
+
             if correct_index_str == '':
                 print('empty input not accepted (at least one option has to be true)')
                 continue
@@ -141,29 +145,26 @@ def take_quiz():
                 continue
             break
 
-        correct_indices = np.flatnonzero(question_df.loc[questions_sample[question_number]])
+        correct_indices = np.flatnonzero(question_df.loc[questions_sample[question_number]]) + 1
         guesses = set(guess_index_list)
         solution = set(correct_indices)
         status = 'correct' if guesses == solution else 'incorrect'
         print('You guessed the following answers as correct: {}. The correct solution is: {}. Your answer is therefore {}\n'.format(guesses, solution ,status))
 
-
-    
-
-          
-
-
-    
+def chooseAction(action_index):
+    action_functions = [add_questions,print_questions,take_quiz,quit]
+    # if not isinstance(action_index,int):
+    if not isinstance(action_index,str):
+        raise TypeError('The chooseAction function was called with a non-string input argument')
+    if not action_index.isdigit():
+        raise TypeError('Invalid input - please type in the positive INTEGER corresponding to your action of choice')
+    action_index = int(action_index)
+    if not action_index in range(len(action_functions)):
+        raise IndexError('The chosen index lies outside of the valid range 0-{}'.format(len(action_functions)-1))
+    action_functions[action_index]()
 
 def main():
-    action_functions = [add_questions,print_questions,take_quiz,quit]
-    def chooseAction():
-        action = input('Please select your action: ')
-        if not action.isdigit():
-            raise TypeError('Invalid input - please type in the INTEGER corresponding to your action of choice')
-        action = int(action)
-        action_functions[action]()
-    
+
     clearConsole()
     
     while True:
@@ -171,11 +172,12 @@ def main():
         for index,action in enumerate(user_actions):
             print(str(index)+': '+action)
 
+        action = input('Please select your action: ')
         try:
-            chooseAction()
+            chooseAction(action)
         except Exception as ex:
             print(ex)
 
 
 if __name__ == '__main__':
-    main()   
+    main()

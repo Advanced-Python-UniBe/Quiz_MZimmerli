@@ -14,7 +14,7 @@ current_user = None
 question_df = None
 userDict = None
 
-def initializeDbs():
+def initializeDbs(): # Reading csv files on startup or setting them up form scratch if they don't exist yet
     global question_df
     global userDict
     #Load information from csv files containing question & user databases
@@ -36,18 +36,18 @@ def initializeDbs():
             writer.writerow(['Username','Password','Quiz Started','Answers given','Score'])
         userDict = {}
 
-def quit():
+def quit(): # Exit program and save changes to question db to the csv file
     global question_df
     question_df.to_csv('Questions_answers.csv')
     exit()
     
-def clearConsole():
+def clearConsole(): # Clear the text interface from previous outputs
     command = 'clear'
     if os.name in ('nt', 'dos'):  # If Machine is running on Windows, use cls
         command = 'cls'
     os.system(command)
 
-def listStringToStringList(string):
+def listStringToStringList(string): # Handle conversion from a string (read from csv) to a list (e.g. for questions & answers given by a user)
     #Converts a string of form [a,b,c] into the corresponding list
     newList = string.strip('][').split(', ')
     if newList == ['']:
@@ -55,7 +55,7 @@ def listStringToStringList(string):
     newList = [element.strip('\'') for element in newList]
     return newList
 
-def add_questions():
+def add_questions(): # Add a new question to the question dictionary 
     global question_df
     clearConsole()
     question = input('Type in your new question for the quiz:\n')
@@ -122,17 +122,17 @@ def add_questions():
 
             break
 
-def print_questions():
+def print_questions(): # Print the entire question dataframe
     clearConsole()
     global question_df
     print('',question_df.fillna(''))
 
-def question_to_df(question,options,correct):
+def question_to_df(question,options,correct): # Combine the string for the question, the strings for the possible answers and the bool indicating if they're correct into a df
     index = pd.MultiIndex.from_product([[question],options],names=['Question','Options'])
     df = pd.DataFrame(data = [answer in correct for answer in range(1,len(options)+1)],index = index, columns=['Is correct?'])
     return df
 
-def generate_quiz():
+def generate_quiz(): # Select a fixed amount of questions and store them as a 'quiz' (set of questions ) for the active user
     print('generating new quiz')
     global question_df
     global userDict
@@ -146,7 +146,7 @@ def generate_quiz():
     # Immediately commit changes to csv file
     commitUserChanges()
     
-def take_quiz():
+def take_quiz(): # Take user answers for the assigned quiz questions & evaluate them
     clearConsole()
     no_answers_df_copy = question_df.copy()
     no_answers_df_copy['Is correct?'] = ''
@@ -210,7 +210,7 @@ def take_quiz():
         commitUserChanges()
         print('You guessed the following answers as correct: {}. The correct solution is: {}. Your answer is therefore {}\n'.format(guesses, solution ,status))
 
-def review_answers():
+def review_answers(): # Allows the user to see the questions already answered, what answers were given and what would have been the correct solution
     clearConsole()
     no_answers_df_copy = question_df.copy()
     no_answers_df_copy['Is correct?'] = ''
@@ -238,7 +238,7 @@ def review_answers():
     
     print('\nAnswered {} out of {} questions. Current score = {}'.format(alreadyAnswered, len(questions), userDict[current_user][3]))
 
-def plot_scores():
+def plot_scores(): # Plots the scores of all users
     labels = []
     scoresAchieved = []
     scoresMax = []
@@ -260,7 +260,7 @@ def plot_scores():
 
     plt.show()
 
-def logIn():
+def logIn(): # Checks username & password and if correct sets active user
     print('Logging into existing account:')
     
     #Get username input
@@ -292,12 +292,12 @@ def logIn():
             print(user)
         print('\n')
 
-def logOut():
+def logOut(): # Unsets active user
     global current_user
     current_user = None
     clearConsole()
 
-def createNewUser():
+def createNewUser(): # Creates new user entry
     global userDict
     #Choose a username
     while True:
@@ -341,7 +341,7 @@ def createNewUser():
     userDict[name] = [password,[],[],0]
     commitUserChanges()
 
-def chooseAction(action_index,action_functions = [add_questions,print_questions,take_quiz, review_answers, plot_scores, logOut]):
+def chooseAction(action_index,action_functions = [add_questions,print_questions,take_quiz, review_answers, plot_scores, logOut]): # Calls functions based on user input
     # if not isinstance(action_index,int):
     if not isinstance(action_index,str):
         raise TypeError('The chooseAction function was called with a non-string input argument')
@@ -352,7 +352,7 @@ def chooseAction(action_index,action_functions = [add_questions,print_questions,
         raise IndexError('The chosen index lies outside of the valid range 0-{}'.format(len(action_functions)-1))
     action_functions[action_index]()
 
-def commitUserChanges():
+def commitUserChanges(): # Commits changes on dictionaries back to the csv-files
     global userDict
     # Write updated user information to Users.csv
     # Inefficient since it writes the entire dictionary from scratch to update a single entry
@@ -367,7 +367,7 @@ def commitUserChanges():
             next(reader)
             userDict = {rows[0]:[rows[1],rows[2],rows[3],rows[4]]for rows in reader}
 
-def main():
+def main(): # Starts up text interface
     initializeDbs()
     clearConsole()
     global current_user

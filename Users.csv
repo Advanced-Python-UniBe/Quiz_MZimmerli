@@ -1,0 +1,4 @@
+Username;Password;Quiz Started;Answers given;Score
+John;Testpass;['Other question', 'Example question 1', 'Some additional question'];['1&3', '2', '1'];0
+Joe;Differentpass;['Example question 1', 'Some additional question', 'Other question'];['1&3', '2', '1&4'];2
+Fred;123abc321;['Example question 1', 'Other question', 'Some additional question'];[];0

@@ -7,23 +7,33 @@ class TestAction(unittest.TestCase):
     @patch('Quiz.add_questions')
     @patch('Quiz.print_questions')
     @patch('Quiz.take_quiz')
-    @patch('Quiz.quit')
-    def test_action_chosen(self, mock_quit,mock_take_quiz,mock_print_questions,mock_add_questions):
+    @patch('Quiz.review_answers')
+    @patch('Quiz.plot_scores')
+    @patch('Quiz.logOut')
+    def test_action_chosen(self, mock_logOut, mock_plot_scores, mock_review_answers, mock_take_quiz, mock_print_questions,mock_add_questions):
         self.assertFalse(mock_add_questions.called)
-        chooseAction('0')
+        chooseAction('0',action_functions = [mock_add_questions, mock_print_questions, mock_take_quiz,mock_review_answers, mock_plot_scores, mock_logOut])
         self.assertTrue(mock_add_questions.called)
 
         self.assertFalse(mock_print_questions.called)
-        chooseAction('1')
+        chooseAction('1',action_functions = [mock_add_questions, mock_print_questions, mock_take_quiz,mock_review_answers, mock_plot_scores, mock_logOut])
         self.assertTrue(mock_print_questions.called)
 
         self.assertFalse(mock_take_quiz.called)
-        chooseAction('2')
+        chooseAction('2',action_functions = [mock_add_questions, mock_print_questions, mock_take_quiz,mock_review_answers, mock_plot_scores, mock_logOut])
         self.assertTrue(mock_take_quiz.called)
 
-        self.assertFalse(mock_quit.called)
-        chooseAction('3')
-        self.assertTrue(mock_quit.called)
+        self.assertFalse(mock_review_answers.called)
+        chooseAction('3',action_functions = [mock_add_questions, mock_print_questions, mock_take_quiz,mock_review_answers, mock_plot_scores, mock_logOut])
+        self.assertTrue(mock_review_answers.called)
+
+        self.assertFalse(mock_plot_scores.called)
+        chooseAction('4',action_functions = [mock_add_questions, mock_print_questions, mock_take_quiz,mock_review_answers, mock_plot_scores, mock_logOut])
+        self.assertTrue(mock_plot_scores.called)
+
+        self.assertFalse(mock_logOut.called)
+        chooseAction('5',action_functions = [mock_add_questions, mock_print_questions, mock_take_quiz,mock_review_answers, mock_plot_scores, mock_logOut])
+        self.assertTrue(mock_logOut.called)
 
     def test_input_value(self):
         self.assertRaises(TypeError, chooseAction,'4.4')
@@ -32,7 +42,7 @@ class TestAction(unittest.TestCase):
         self.assertRaises(TypeError, chooseAction,'')
 
     def test_valid_action(self):
-        self.assertRaises(IndexError, chooseAction, '4')
+        self.assertRaises(IndexError, chooseAction, '6')
         
            
 if __name__ == '__main__':
